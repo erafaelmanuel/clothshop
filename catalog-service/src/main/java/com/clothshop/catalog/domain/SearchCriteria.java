@@ -1,4 +1,4 @@
-package com.clothshop.catalog.data.domain;
+package com.clothshop.catalog.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,5 +1,6 @@
 package com.clothshop.catalog.service;
 
+import com.clothshop.catalog.data.entity.Category;
 import com.clothshop.catalog.data.entity.Item;
 import com.clothshop.catalog.data.repository.ItemRepository;
 import com.clothshop.catalog.exception.EntityException;
@@ -36,5 +37,13 @@ public class ItemService {
 
     public Item findById(@NotNull String id) {
         return itemRepo.findById(id).orElseThrow(() -> new EntityException("No item found"));
+    }
+
+    public Page<Item> findByCategoryId(@NotNull List<String> categoryId, Pageable pageable) {
+        return itemRepo.findByCategoryId(categoryId, pageable);
+    }
+
+    public Page<Category> findCategoriesById(String itemId, Pageable pageable) {
+        return itemRepo.findCategoriesById(itemId, pageable);
     }
 }

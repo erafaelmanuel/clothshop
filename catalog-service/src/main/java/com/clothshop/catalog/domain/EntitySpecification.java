@@ -1,4 +1,4 @@
-package com.clothshop.catalog.data.domain;
+package com.clothshop.catalog.domain;
 
 import org.springframework.data.jpa.domain.Specification;
 
