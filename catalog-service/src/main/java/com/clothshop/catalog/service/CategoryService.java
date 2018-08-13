@@ -3,10 +3,12 @@ package com.clothshop.catalog.service;
 import com.clothshop.catalog.data.entity.Category;
 import com.clothshop.catalog.data.repository.CategoryRepository;
 import com.clothshop.catalog.exception.EntityException;
+import com.clothshop.catalog.util.UUIDGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -44,5 +46,19 @@ public class CategoryService {
             categories.addAll(findByAncestor(category.getId()));
         });
         return categories;
+    }
+
+    public void save(@NotNull Category category) {
+        if (StringUtils.isEmpty(category.getName())) {
+            throw new EntityException("Property name is required!");
+        }
+        if (StringUtils.isEmpty(category.getId())) {
+            category.setId(UUIDGenerator.randomUUID());
+        }
+        categoryRepo.save(category);
+    }
+
+    public void delete(Category category) {
+        categoryRepo.delete(category);
     }
 }

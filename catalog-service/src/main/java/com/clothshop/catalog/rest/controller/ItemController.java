@@ -204,7 +204,7 @@ public class ItemController {
     }
 
     @PutMapping(value = {"/{itemId}"}, consumes = {"application/json", "application/hal+json"})
-    public ResponseEntity<?> update(@PathVariable("itemId") String itemId, @RequestBody ItemDto dto) {
+    public ResponseEntity<?> updateById(@PathVariable("itemId") String itemId, @RequestBody ItemDto dto) {
         try {
             final Item item = itemService.findById(itemId);
 

@@ -1,7 +1,7 @@
 package com.clothshop.catalog.rest.controller;
 
-import com.clothshop.catalog.domain.EntitySpecificationBuilder;
 import com.clothshop.catalog.data.entity.Category;
+import com.clothshop.catalog.domain.EntitySpecificationBuilder;
 import com.clothshop.catalog.domain.Message;
 import com.clothshop.catalog.exception.EntityException;
 import com.clothshop.catalog.rest.dto.CategoryDto;
@@ -41,7 +41,7 @@ public class CategoryController {
         this.mapper = mapper;
     }
 
-    @GetMapping(produces = {"application/json", "application/hal+json"})
+    @GetMapping(value = {"/all"}, produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findAll(@RequestParam(name = "search", required = false) String search,
                                      @RequestParam(name = "page", required = false) Integer page,
                                      @RequestParam(name = "size", required = false) Integer size,
@@ -203,5 +203,40 @@ public class CategoryController {
         resources = new Resources<>(categories);
         resources.add(linkTo(methodOn(getClass()).findByAncestor(categoryId)).withSelfRel());
         return new ResponseEntity<>(resources, HttpStatus.OK);
+    }
+
+    @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
+    public ResponseEntity<?> add(@RequestBody CategoryDto dto) {
+        try {
+            categoryService.save(mapper.from(dto).toInstanceOf(Category.class));
+            return ResponseEntity.noContent().build();
+        } catch (EntityException e) {
+            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping(value = {"/{categoryId}"}, consumes = {"application/json", "application/hal+json"})
+    public ResponseEntity<?> updateById(@PathVariable("categoryId") String categoryId, @RequestBody CategoryDto dto) {
+        try {
+            final Category category = categoryService.findById(categoryId);
+
+            mapper.from(dto).ignore("uid").to(category);
+            categoryService.save(category);
+            return ResponseEntity.noContent().build();
+        } catch (EntityException e) {
+            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<?> deleteById(@PathVariable("categoryId") String categoryId) {
+        try {
+            final Category category = categoryService.findById(categoryId);
+
+            categoryService.delete(category);
+            return ResponseEntity.noContent().build();
+        } catch (EntityException e) {
+            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
+        }
     }
 }
