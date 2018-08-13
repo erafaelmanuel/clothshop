@@ -33,10 +33,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class CategoryController {
 
     private CategoryService categoryService;
+    private Mapper mapper;
 
     @Autowired
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, Mapper mapper) {
         this.categoryService = categoryService;
+        this.mapper = mapper;
     }
 
     @GetMapping(produces = {"application/json", "application/hal+json"})
@@ -46,14 +48,10 @@ public class CategoryController {
                                      @RequestParam(name = "sort", required = false) String sort) {
         final EntitySpecificationBuilder<Category> builder = new EntitySpecificationBuilder<>();
         final List<CategoryDto> categories = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final int tempPage = (page != null && page > 0 ? page - 1 : 0);
         final int tempSize = (size != null ? size : 20);
         final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-
         final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
-
         final Page<Category> pageCategory;
         final PagedResources<CategoryDto> resources;
 
@@ -102,7 +100,6 @@ public class CategoryController {
     public ResponseEntity<?> findById(@PathVariable("categoryId") String categoryId) {
         try {
             final Category category = categoryService.findById(categoryId);
-            final Mapper mapper = new Mapper();
             final CategoryDto dto = mapper.from(category).toInstanceOf(CategoryDto.class);
             final Resource<CategoryDto> resource = new Resource<>(dto);
 
@@ -118,15 +115,11 @@ public class CategoryController {
                                                 @RequestParam(name = "size", required = false) Integer size,
                                                 @RequestParam(name = "sort", required = false) String sort) {
         final List<CategoryDto> categories = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final int tempPage = (page != null && page > 0 ? page - 1 : 0);
         final int tempSize = (size != null ? size : 20);
         final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-
         final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
         final Page<Category> pageCategory = categoryService.findByParentIsNull(pageable);
-
         final PagedResources<CategoryDto> resources;
 
         pageCategory.forEach(category -> {
@@ -162,15 +155,11 @@ public class CategoryController {
                                             @RequestParam(name = "size", required = false) Integer size,
                                             @RequestParam(name = "sort", required = false) String sort) {
         final List<CategoryDto> categories = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final int tempPage = (page != null && page > 0 ? page - 1 : 0);
         final int tempSize = (size != null ? size : 20);
         final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-
         final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
         final Page<Category> pageCategory = categoryService.findByParentId(categoryId, pageable);
-
         final PagedResources<CategoryDto> resources;
 
         pageCategory.forEach(category -> {
@@ -203,9 +192,8 @@ public class CategoryController {
     @GetMapping(value = "/search/findByAncestor", produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findByAncestor(@RequestParam("categoryId") String categoryId) {
         final List<CategoryDto> categories = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final Resources<CategoryDto> resources;
+
         categoryService.findByAncestor(categoryId).forEach(category -> {
             final CategoryDto dto = mapper.from(category).toInstanceOf(CategoryDto.class);
 

@@ -9,6 +9,7 @@ import com.clothshop.catalog.rest.dto.CategoryDto;
 import com.clothshop.catalog.rest.dto.ItemDto;
 import com.clothshop.catalog.service.ItemService;
 import com.rem.mappyfy.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,9 +34,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class ItemController {
 
     private ItemService itemService;
+    private Mapper mapper;
 
-    public ItemController(ItemService itemService) {
+    @Autowired
+    public ItemController(ItemService itemService, Mapper mapper) {
         this.itemService = itemService;
+        this.mapper = mapper;
     }
 
     @GetMapping(produces = {"application/json", "application/hal+json"})
@@ -45,14 +49,10 @@ public class ItemController {
                                      @RequestParam(name = "sort", required = false) String sort) {
         final EntitySpecificationBuilder<Item> builder = new EntitySpecificationBuilder<>();
         final List<ItemDto> items = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final int tempPage = (page != null && page > 0 ? page - 1 : 0);
         final int tempSize = (size != null ? size : 20);
         final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-
         final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
-
         final PagedResources<ItemDto> resources;
         final Page<Item> pageItem;
 
@@ -99,7 +99,6 @@ public class ItemController {
     @GetMapping(value = {"/{itemId}"}, produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findById(@PathVariable("itemId") String itemId) {
         try {
-            final Mapper mapper = new Mapper();
             final Item item = itemService.findById(itemId);
             final ItemDto dto = mapper.from(item).toInstanceOf(ItemDto.class);
             final Resource<ItemDto> resource = new Resource<>(dto);
@@ -119,12 +118,9 @@ public class ItemController {
                                               @RequestParam(name = "size", required = false) Integer size,
                                               @RequestParam(name = "sort", required = false) String sort) {
         final List<ItemDto> items = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final int tempPage = (page != null && page > 0 ? page - 1 : 0);
         final int tempSize = (size != null ? size : 20);
         final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-
         final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
         final Page<Item> pageItem = itemService.findByCategoryId(categoryIds, pageable);
 
@@ -163,15 +159,11 @@ public class ItemController {
                                                 @RequestParam(name = "size", required = false) Integer size,
                                                 @RequestParam(name = "sort", required = false) String sort) {
         final List<CategoryDto> categories = new ArrayList<>();
-        final Mapper mapper = new Mapper();
-
         final int tempPage = (page != null && page > 0 ? page - 1 : 0);
         final int tempSize = (size != null ? size : 20);
         final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-
         final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
         final Page<Category> pageCategory = itemService.findCategoriesById(itemId, pageable);
-
         final PagedResources<CategoryDto> resources;
 
         pageCategory.forEach(category -> {
