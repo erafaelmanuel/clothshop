@@ -1,4 +1,4 @@
-package com.clothshop.account.domain;
+package com.clothshop.accountservice.domain;
 
 import lombok.Data;
 

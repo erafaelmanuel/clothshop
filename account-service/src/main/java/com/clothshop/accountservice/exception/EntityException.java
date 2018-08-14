@@ -1,4 +1,4 @@
-package com.clothshop.account.exception;
+package com.clothshop.accountservice.exception;
 
 public class EntityException extends RuntimeException {
 

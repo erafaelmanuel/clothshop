@@ -1,4 +1,4 @@
-package com.clothshop.account.data.entity;
+package com.clothshop.accountservice.data.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

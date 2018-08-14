@@ -1,7 +1,7 @@
-package com.clothshop.account.data.repository;
+package com.clothshop.accountservice.data.repository;
 
-import com.clothshop.account.data.entity.Role;
-import com.clothshop.account.data.entity.User;
+import com.clothshop.accountservice.data.entity.Role;
+import com.clothshop.accountservice.data.entity.User;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;

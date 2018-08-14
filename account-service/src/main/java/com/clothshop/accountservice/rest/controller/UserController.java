@@ -1,11 +1,11 @@
-package com.clothshop.account.rest.controller;
+package com.clothshop.accountservice.rest.controller;
 
-import com.clothshop.account.data.entity.User;
-import com.clothshop.account.domain.Message;
-import com.clothshop.account.exception.EntityException;
-import com.clothshop.account.rest.dto.UserDto;
-import com.clothshop.account.service.UserService;
-import com.clothshop.account.util.SearchingAndPagingUtil;
+import com.clothshop.accountservice.data.entity.User;
+import com.clothshop.accountservice.domain.Message;
+import com.clothshop.accountservice.exception.EntityException;
+import com.clothshop.accountservice.rest.dto.UserDto;
+import com.clothshop.accountservice.service.UserService;
+import com.clothshop.accountservice.util.SearchingAndPagingUtil;
 import com.rem.mappyfy.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

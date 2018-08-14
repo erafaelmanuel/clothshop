@@ -1,4 +1,4 @@
-package com.clothshop.account.domain;
+package com.clothshop.accountservice.domain;
 
 import org.springframework.data.jpa.domain.Specification;
 

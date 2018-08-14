@@ -1,4 +1,4 @@
-package com.clothshop.account.util;
+package com.clothshop.accountservice.util;
 
 import java.util.Calendar;
 

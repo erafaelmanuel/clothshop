@@ -1,4 +1,4 @@
-package com.clothshop.account;
+package com.clothshop.accountservice;
 
 import com.rem.mappyfy.Mapper;
 import org.springframework.boot.SpringApplication;

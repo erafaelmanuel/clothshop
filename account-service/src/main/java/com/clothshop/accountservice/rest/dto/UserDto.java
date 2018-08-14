@@ -1,4 +1,4 @@
-package com.clothshop.account.rest.dto;
+package com.clothshop.accountservice.rest.dto;
 
 import com.rem.mappyfy.Bind;
 import lombok.AllArgsConstructor;
@@ -13,16 +13,8 @@ public class UserDto extends ResourceSupport {
 
     @Bind(fields = {"id"})
     private String uid;
-
-
     private String name;
-
-
     private String email;
-
-
     private String password;
-
-
     private boolean isEnabled;
 }

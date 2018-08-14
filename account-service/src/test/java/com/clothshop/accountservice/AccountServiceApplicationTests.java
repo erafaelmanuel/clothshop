@@ -1,4 +1,4 @@
-package com.clothshop.account;
+package com.clothshop.accountservice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

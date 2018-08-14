@@ -1,6 +1,6 @@
-package com.clothshop.account.util;
+package com.clothshop.accountservice.util;
 
-import com.clothshop.account.domain.EntitySpecificationBuilder;
+import com.clothshop.accountservice.domain.EntitySpecificationBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

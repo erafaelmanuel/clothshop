@@ -1,9 +1,9 @@
-package com.clothshop.account.service;
+package com.clothshop.accountservice.service;
 
-import com.clothshop.account.data.entity.User;
-import com.clothshop.account.data.repository.UserRepository;
-import com.clothshop.account.exception.EntityException;
-import com.clothshop.account.util.UUIDGenerator;
+import com.clothshop.accountservice.data.entity.User;
+import com.clothshop.accountservice.data.repository.UserRepository;
+import com.clothshop.accountservice.exception.EntityException;
+import com.clothshop.accountservice.util.UUIDGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
