@@ -17,11 +17,15 @@ public class SearchingAndPagingUtil<T> {
     private Integer size;
     private String sort;
 
-    public SearchingAndPagingUtil(String search, Integer page, Integer size, String sort) {
-        this.search = search;
+    public SearchingAndPagingUtil(Integer page, Integer size, String sort) {
         this.page = page;
         this.size = size;
         this.sort = sort;
+    }
+
+    public SearchingAndPagingUtil(String search, Integer page, Integer size, String sort) {
+        this(page, size, sort);
+        this.search = search;
     }
 
     public Specification<T> buildSpecification() {

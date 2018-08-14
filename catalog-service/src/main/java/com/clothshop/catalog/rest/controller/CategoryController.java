@@ -1,29 +1,23 @@
 package com.clothshop.catalog.rest.controller;
 
 import com.clothshop.catalog.data.entity.Category;
-import com.clothshop.catalog.domain.EntitySpecificationBuilder;
 import com.clothshop.catalog.domain.Message;
 import com.clothshop.catalog.exception.EntityException;
 import com.clothshop.catalog.rest.dto.CategoryDto;
 import com.clothshop.catalog.service.CategoryService;
+import com.clothshop.catalog.util.SearchingAndPagingUtil;
 import com.rem.mappyfy.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -46,35 +40,18 @@ public class CategoryController {
                                      @RequestParam(name = "page", required = false) Integer page,
                                      @RequestParam(name = "size", required = false) Integer size,
                                      @RequestParam(name = "sort", required = false) String sort) {
-        final EntitySpecificationBuilder<Category> builder = new EntitySpecificationBuilder<>();
+        final SearchingAndPagingUtil<Category> util = new SearchingAndPagingUtil<>(search, page, size, sort);
+        final Page<Category> pageCategory = categoryService.findAll(util.buildSpecification(), util.buildPageable());
         final List<CategoryDto> categories = new ArrayList<>();
-        final int tempPage = (page != null && page > 0 ? page - 1 : 0);
-        final int tempSize = (size != null ? size : 20);
-        final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-        final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
-        final Page<Category> pageCategory;
         final PagedResources<CategoryDto> resources;
 
-        if (!StringUtils.isEmpty(search)) {
-            final Pattern pattern = Pattern.compile("(\\w+?)(:|<|>)(\\w+?),");
-            final Matcher matcher = pattern.matcher(search + ",");
-
-            while (matcher.find()) {
-                builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
-            }
-            if (builder.getParamSize() == 0) {
-                builder.with("name", ":", search);
-            }
-        }
-
-        pageCategory = categoryService.findAll(builder.build(), pageable);
         pageCategory.forEach(category -> {
             final CategoryDto dto = mapper.from(category).toInstanceOf(CategoryDto.class);
 
             dto.add(linkTo(methodOn(getClass()).findById(dto.getUid())).withSelfRel());
             categories.add(dto);
         });
-        resources = new PagedResources<>(categories, new PagedResources.PageMetadata(tempSize, (tempPage + 1),
+        resources = new PagedResources<>(categories, new PagedResources.PageMetadata(util.getSize(), util.getNumber(),
                 pageCategory.getTotalElements(), pageCategory.getTotalPages()));
 
         resources.add(linkTo(methodOn(getClass()).findAll(search, page, size, sort)).withSelfRel());
@@ -84,12 +61,12 @@ public class CategoryController {
             resources.add(linkTo(methodOn(getClass()).findAll(search, pageCategory.getTotalPages(),
                     size, sort)).withRel("last"));
         }
-        if ((tempPage + 1) > 1 && (tempPage + 1) <= pageCategory.getTotalPages() && !pageCategory.isFirst()) {
-            resources.add(linkTo(methodOn(getClass()).findAll(search, (tempPage + 1) - 1, size, sort))
+        if (util.getNumber() > 1 && util.getNumber() <= pageCategory.getTotalPages() && !pageCategory.isFirst()) {
+            resources.add(linkTo(methodOn(getClass()).findAll(search, util.getNumber() - 1, size, sort))
                     .withRel("prev"));
         }
         if (!pageCategory.isLast()) {
-            resources.add(linkTo(methodOn(getClass()).findAll(search, (tempPage + 1) + 1, size, sort))
+            resources.add(linkTo(methodOn(getClass()).findAll(search, util.getNumber() + 1, size, sort))
                     .withRel("next"));
         }
 
@@ -114,12 +91,9 @@ public class CategoryController {
     public ResponseEntity<?> findByParentIsNull(@RequestParam(name = "page", required = false) Integer page,
                                                 @RequestParam(name = "size", required = false) Integer size,
                                                 @RequestParam(name = "sort", required = false) String sort) {
+        final SearchingAndPagingUtil util = new SearchingAndPagingUtil(page, size, sort);
+        final Page<Category> pageCategory = categoryService.findByParentIsNull(util.buildPageable());
         final List<CategoryDto> categories = new ArrayList<>();
-        final int tempPage = (page != null && page > 0 ? page - 1 : 0);
-        final int tempSize = (size != null ? size : 20);
-        final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-        final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
-        final Page<Category> pageCategory = categoryService.findByParentIsNull(pageable);
         final PagedResources<CategoryDto> resources;
 
         pageCategory.forEach(category -> {
@@ -128,7 +102,7 @@ public class CategoryController {
             dto.add(linkTo(methodOn(getClass()).findById(dto.getUid())).withSelfRel());
             categories.add(dto);
         });
-        resources = new PagedResources<>(categories, new PagedResources.PageMetadata(tempSize, (tempPage + 1),
+        resources = new PagedResources<>(categories, new PagedResources.PageMetadata(util.getSize(), util.getNumber(),
                 pageCategory.getTotalElements(), pageCategory.getTotalPages()));
 
         resources.add(linkTo(methodOn(getClass()).findByParentIsNull(page, size, sort)).withSelfRel());
@@ -138,12 +112,12 @@ public class CategoryController {
             resources.add(linkTo(methodOn(getClass()).findByParentIsNull(pageCategory.getTotalPages(),
                     size, sort)).withRel("last"));
         }
-        if ((tempPage + 1) > 1 && (tempPage + 1) <= pageCategory.getTotalPages() && !pageCategory.isFirst()) {
-            resources.add(linkTo(methodOn(getClass()).findByParentIsNull((tempPage + 1) - 1, size, sort))
+        if (util.getNumber() > 1 && util.getNumber() <= pageCategory.getTotalPages() && !pageCategory.isFirst()) {
+            resources.add(linkTo(methodOn(getClass()).findByParentIsNull(util.getNumber() - 1, size, sort))
                     .withRel("prev"));
         }
         if (!pageCategory.isLast()) {
-            resources.add(linkTo(methodOn(getClass()).findByParentIsNull((tempPage + 1) + 1, size, sort))
+            resources.add(linkTo(methodOn(getClass()).findByParentIsNull(util.getNumber() + 1, size, sort))
                     .withRel("next"));
         }
         return new ResponseEntity<>(resources, HttpStatus.OK);
@@ -154,12 +128,9 @@ public class CategoryController {
                                             @RequestParam(name = "page", required = false) Integer page,
                                             @RequestParam(name = "size", required = false) Integer size,
                                             @RequestParam(name = "sort", required = false) String sort) {
+        final SearchingAndPagingUtil util = new SearchingAndPagingUtil(page, size, sort);
+        final Page<Category> pageCategory = categoryService.findByParentId(categoryId, util.buildPageable());
         final List<CategoryDto> categories = new ArrayList<>();
-        final int tempPage = (page != null && page > 0 ? page - 1 : 0);
-        final int tempSize = (size != null ? size : 20);
-        final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
-        final Pageable pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
-        final Page<Category> pageCategory = categoryService.findByParentId(categoryId, pageable);
         final PagedResources<CategoryDto> resources;
 
         pageCategory.forEach(category -> {
@@ -168,7 +139,7 @@ public class CategoryController {
             dto.add(linkTo(methodOn(getClass()).findById(dto.getUid())).withSelfRel());
             categories.add(dto);
         });
-        resources = new PagedResources<>(categories, new PagedResources.PageMetadata(tempSize, (tempPage + 1),
+        resources = new PagedResources<>(categories, new PagedResources.PageMetadata(util.getSize(), util.getNumber(),
                 pageCategory.getTotalElements(), pageCategory.getTotalPages()));
 
         resources.add(linkTo(methodOn(getClass()).findByParentId(categoryId, page, size, sort)).withSelfRel());
@@ -178,12 +149,12 @@ public class CategoryController {
             resources.add(linkTo(methodOn(getClass()).findByParentId(categoryId, pageCategory.getTotalPages(),
                     size, sort)).withRel("last"));
         }
-        if ((tempPage + 1) > 1 && (tempPage + 1) <= pageCategory.getTotalPages() && !pageCategory.isFirst()) {
-            resources.add(linkTo(methodOn(getClass()).findByParentId(categoryId, (tempPage + 1) - 1, size, sort))
+        if (util.getNumber() > 1 && util.getNumber() <= pageCategory.getTotalPages() && !pageCategory.isFirst()) {
+            resources.add(linkTo(methodOn(getClass()).findByParentId(categoryId, util.getNumber() - 1, size, sort))
                     .withRel("prev"));
         }
         if (!pageCategory.isLast()) {
-            resources.add(linkTo(methodOn(getClass()).findByParentId(categoryId, (tempPage + 1) + 1, size, sort))
+            resources.add(linkTo(methodOn(getClass()).findByParentId(categoryId, util.getNumber() + 1, size, sort))
                     .withRel("next"));
         }
         return new ResponseEntity<>(resources, HttpStatus.OK);

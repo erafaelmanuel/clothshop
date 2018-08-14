@@ -42,11 +42,10 @@ public class ItemController {
                                      @RequestParam(name = "size", required = false) Integer size,
                                      @RequestParam(name = "sort", required = false) String sort) {
         final SearchingAndPagingUtil<Item> util = new SearchingAndPagingUtil<>(search, page, size, sort);
+        final Page<Item> pageItem = itemService.findAll(util.buildSpecification(), util.buildPageable());
         final List<ItemDto> items = new ArrayList<>();
         final PagedResources<ItemDto> resources;
-        final Page<Item> pageItem;
 
-        pageItem = itemService.findAll(util.buildSpecification(), util.buildPageable());
         pageItem.forEach(item -> {
             final ItemDto dto = mapper.from(item).toInstanceOf(ItemDto.class);
 
@@ -96,9 +95,9 @@ public class ItemController {
                                               @RequestParam(name = "page", required = false) Integer page,
                                               @RequestParam(name = "size", required = false) Integer size,
                                               @RequestParam(name = "sort", required = false) String sort) {
-        final SearchingAndPagingUtil util = new SearchingAndPagingUtil(null, page, size, sort);
-        final List<ItemDto> items = new ArrayList<>();
+        final SearchingAndPagingUtil util = new SearchingAndPagingUtil(page, size, sort);
         final Page<Item> pageItem = itemService.findByCategoryId(categoryIds, util.buildPageable());
+        final List<ItemDto> items = new ArrayList<>();
         final PagedResources<ItemDto> resources;
 
         pageItem.forEach(item -> {
@@ -133,7 +132,7 @@ public class ItemController {
                                                 @RequestParam(name = "page", required = false) Integer page,
                                                 @RequestParam(name = "size", required = false) Integer size,
                                                 @RequestParam(name = "sort", required = false) String sort) {
-        final SearchingAndPagingUtil util = new SearchingAndPagingUtil(null, page, size, sort);
+        final SearchingAndPagingUtil util = new SearchingAndPagingUtil(page, size, sort);
         final List<CategoryDto> categories = new ArrayList<>();
         final Page<Category> pageCategory = itemService.findCategoriesById(itemId, util.buildPageable());
         final PagedResources<CategoryDto> resources;
