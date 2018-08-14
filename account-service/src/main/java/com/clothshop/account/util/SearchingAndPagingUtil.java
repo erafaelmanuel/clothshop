@@ -12,15 +12,24 @@ import java.util.regex.Pattern;
 
 public class SearchingAndPagingUtil<T> {
 
-    private EntitySpecificationBuilder<T> builder = new EntitySpecificationBuilder<>();
+    private String search;
+    private Integer page;
+    private Integer size;
+    private String sort;
 
-    private Pageable pageable;
+    public SearchingAndPagingUtil(Integer page, Integer size, String sort) {
+        this.page = page;
+        this.size = size;
+        this.sort = sort;
+    }
 
     public SearchingAndPagingUtil(String search, Integer page, Integer size, String sort) {
+        this(page, size, sort);
+        this.search = search;
+    }
 
-        final int tempPage = (page != null && page > 0 ? page - 1 : 0);
-        final int tempSize = (size != null ? size : 20);
-        final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
+    public Specification<T> buildSpecification() {
+        final EntitySpecificationBuilder<T> builder = new EntitySpecificationBuilder<>();
 
         if (!StringUtils.isEmpty(search)) {
             final Pattern pattern = Pattern.compile("(\\w+?)(:|<|>)(\\w+?),");
@@ -33,22 +42,22 @@ public class SearchingAndPagingUtil<T> {
                 builder.with("name", ":", search);
             }
         }
-        pageable = PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
-    }
-
-    public Specification<T> getSpecification() {
         return builder.build();
     }
 
-    public Pageable getPageable() {
-        return pageable;
+    public Pageable buildPageable() {
+        final int tempPage = (page != null && page > 0 ? page - 1 : 0);
+        final int tempSize = (size != null ? size : 20);
+        final String tempSort = !StringUtils.isEmpty(sort) ? sort : "name";
+
+        return PageRequest.of(tempPage, tempSize, Sort.by(tempSort));
     }
 
     public int getNumber() {
-        return pageable.getPageNumber() + 1;
+        return (page != null && page > 0 ? page - 1 : 0) + 1;
     }
 
     public int getSize() {
-        return pageable.getPageSize();
+        return (size != null ? size : 20);
     }
 }

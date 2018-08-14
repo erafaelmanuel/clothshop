@@ -44,7 +44,7 @@ public class UserController {
         final PagedResources<UserDto> resources;
         final Page<User> pageUser;
 
-        pageUser = userService.findAll(util.getSpecification(), util.getPageable());
+        pageUser = userService.findAll(util.buildSpecification(), util.buildPageable());
         pageUser.forEach(user -> {
             final UserDto dto = mapper.from(user).toInstanceOf(UserDto.class);
 
