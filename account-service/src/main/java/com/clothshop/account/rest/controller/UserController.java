@@ -40,11 +40,10 @@ public class UserController {
                                      @RequestParam(value = "size", required = false) Integer size,
                                      @RequestParam(value = "sort", required = false) String sort) {
         final SearchingAndPagingUtil<User> util = new SearchingAndPagingUtil<>(search, page, size, sort);
+        final Page<User> pageUser = userService.findAll(util.buildSpecification(), util.buildPageable());
         final List<UserDto> users = new ArrayList<>();
         final PagedResources<UserDto> resources;
-        final Page<User> pageUser;
 
-        pageUser = userService.findAll(util.buildSpecification(), util.buildPageable());
         pageUser.forEach(user -> {
             final UserDto dto = mapper.from(user).toInstanceOf(UserDto.class);
 
@@ -97,6 +96,41 @@ public class UserController {
             return new ResponseEntity<>(resource, HttpStatus.OK);
         } catch (EntityException e) {
             return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
+        }
+    }
+
+    @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
+    public ResponseEntity<?> add(@RequestBody UserDto dto) {
+        try {
+            userService.save(mapper.from(dto).toInstanceOf(User.class));
+            return ResponseEntity.noContent().build();
+        } catch (EntityException e) {
+            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping(value = {"/{userId}"}, consumes = {"application/json", "application/hal+json"})
+    public ResponseEntity<?> updateById(@PathVariable("userId") String userId, @RequestBody UserDto dto) {
+        try {
+            final User user = userService.findById(userId);
+
+            mapper.from(dto).ignore("uid").to(user);
+            userService.save(user);
+            return ResponseEntity.noContent().build();
+        } catch (EntityException e) {
+            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteById(@PathVariable("userId") String userId) {
+        try {
+            final User user = userService.findById(userId);
+
+            userService.delete(user);
+            return ResponseEntity.noContent().build();
+        } catch (EntityException e) {
+            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
         }
     }
 }
