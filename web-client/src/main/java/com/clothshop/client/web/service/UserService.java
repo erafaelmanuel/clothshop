@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class UserService {
+public class UserService implements BaseService {
 
     private EurekaClient client;
     private RestTemplateBuilder builder;
@@ -28,9 +28,8 @@ public class UserService {
         final InstanceInfo instanceInfo = client.getNextServerFromEureka("account-service", false);
         final String baseUrl = instanceInfo.getHomePageUrl();
 
-        return restTemplate
-                .exchange(baseUrl.concat("/users/").concat(userId), HttpMethod.GET, null,
-                new ParameterizedTypeReference<Resource<User>>() {
-                }).getBody().getContent();
+        restTemplate.getMessageConverters().add(getHalConverter());
+        return restTemplate.exchange(baseUrl.concat("/users/").concat(userId), HttpMethod.GET, null,
+                new ParameterizedTypeReference<Resource<User>>() {}).getBody().getContent();
     }
 }
