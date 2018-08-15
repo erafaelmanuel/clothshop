@@ -19,7 +19,7 @@ public class Role {
     @Column(name = "_id")
     private String id;
 
-    @Column(name = "_name")
+    @Column(name = "_name", unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.REMOVE)

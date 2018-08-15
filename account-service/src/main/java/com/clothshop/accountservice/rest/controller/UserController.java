@@ -1,8 +1,6 @@
 package com.clothshop.accountservice.rest.controller;
 
 import com.clothshop.accountservice.data.entity.User;
-import com.clothshop.accountservice.domain.Message;
-import com.clothshop.accountservice.exception.EntityConstraintViolationException;
 import com.clothshop.accountservice.rest.dto.UserDto;
 import com.clothshop.accountservice.service.UserService;
 import com.clothshop.accountservice.util.SearchingAndPagingUtil;
