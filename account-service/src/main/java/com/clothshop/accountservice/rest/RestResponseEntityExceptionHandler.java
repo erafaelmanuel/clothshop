@@ -2,6 +2,7 @@ package com.clothshop.accountservice.rest;
 
 import com.clothshop.accountservice.domain.Message;
 import com.clothshop.accountservice.exception.EntityConstraintViolationException;
+import com.clothshop.accountservice.exception.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.Collections;
 
 @ControllerAdvice
-public class RestResponseEntityExceptionHandlerImpl extends ResponseEntityExceptionHandler {
+public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({EntityConstraintViolationException.class})
     public ResponseEntity<Object> handleAccessDeniedException(Exception e, WebRequest request) {
@@ -22,5 +23,13 @@ public class RestResponseEntityExceptionHandlerImpl extends ResponseEntityExcept
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         return new ResponseEntity<>(new Message(206, e.getMessage()), headers, HttpStatus.PARTIAL_CONTENT);
+    }
+
+    @ExceptionHandler({UserNotFoundException.class})
+    public ResponseEntity<Object> handleNotFoundException(Exception e, WebRequest request) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        return new ResponseEntity<>(new Message(404, e.getMessage()), headers, HttpStatus.NOT_FOUND);
     }
 }

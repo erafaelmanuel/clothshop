@@ -1,6 +1,6 @@
 package com.clothshop.accountservice.exception;
 
-public class UserNotFoundException extends EntityConstraintViolationException {
+public class UserNotFoundException extends EntityException {
 
     public UserNotFoundException() {
         this("No user found");

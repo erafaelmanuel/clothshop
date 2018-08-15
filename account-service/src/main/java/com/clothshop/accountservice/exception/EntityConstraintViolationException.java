@@ -1,10 +1,8 @@
 package com.clothshop.accountservice.exception;
 
-public class EntityConstraintViolationException extends RuntimeException {
+public class EntityConstraintViolationException extends EntityException {
 
-    public EntityConstraintViolationException() {
-        this("No message");
-    }
+    public EntityConstraintViolationException() {}
 
     public EntityConstraintViolationException(String arg) {
         super(arg);

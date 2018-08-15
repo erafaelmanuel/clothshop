@@ -13,10 +13,8 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,30 +73,22 @@ public class UserController {
 
     @GetMapping(value = {"/{userId}"}, produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findById(@PathVariable("userId") String userId) {
-        try {
-            final User user = userService.findById(userId);
-            final UserDto dto = mapper.from(user).toInstanceOf(UserDto.class);
-            final Resource<UserDto> resource = new Resource<>(dto);
+        final User user = userService.findById(userId);
+        final UserDto dto = mapper.from(user).toInstanceOf(UserDto.class);
+        final Resource<UserDto> resource = new Resource<>(dto);
 
-            resource.add(linkTo(methodOn(getClass()).findById(userId)).withSelfRel());
-            return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
-        }
+        resource.add(linkTo(methodOn(getClass()).findById(userId)).withSelfRel());
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @GetMapping(value = {"/search/findByEmail"}, produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findByEmail(@RequestParam("email") String email) {
-        try {
-            final User user = userService.findByEmail(email);
-            final UserDto dto = mapper.from(user).toInstanceOf(UserDto.class);
-            final Resource<UserDto> resource = new Resource<>(dto);
+        final User user = userService.findByEmail(email);
+        final UserDto dto = mapper.from(user).toInstanceOf(UserDto.class);
+        final Resource<UserDto> resource = new Resource<>(dto);
 
-            resource.add(linkTo(methodOn(getClass()).findById(dto.getUid())).withSelfRel());
-            return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
-        }
+        resource.add(linkTo(methodOn(getClass()).findById(dto.getUid())).withSelfRel());
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
@@ -109,26 +99,18 @@ public class UserController {
 
     @PutMapping(value = {"/{userId}"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> updateById(@PathVariable("userId") String userId, @RequestBody UserDto dto) {
-        try {
-            final User user = userService.findById(userId);
+        final User user = userService.findById(userId);
 
-            mapper.from(dto).ignore("uid").to(user);
-            userService.save(user);
-            return ResponseEntity.noContent().build();
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        mapper.from(dto).ignore("uid").to(user);
+        userService.save(user);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteById(@PathVariable("userId") String userId) {
-        try {
-            final User user = userService.findById(userId);
+        final User user = userService.findById(userId);
 
-            userService.delete(user);
-            return ResponseEntity.noContent().build();
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        userService.delete(user);
+        return ResponseEntity.noContent().build();
     }
 }

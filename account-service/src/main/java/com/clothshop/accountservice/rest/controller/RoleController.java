@@ -1,8 +1,6 @@
 package com.clothshop.accountservice.rest.controller;
 
 import com.clothshop.accountservice.data.entity.Role;
-import com.clothshop.accountservice.domain.Message;
-import com.clothshop.accountservice.exception.EntityConstraintViolationException;
 import com.clothshop.accountservice.rest.dto.RoleDto;
 import com.clothshop.accountservice.service.RoleService;
 import com.clothshop.accountservice.util.SearchingAndPagingUtil;
@@ -73,50 +71,34 @@ public class RoleController {
 
     @GetMapping(value = {"/{roleId}"}, produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findById(@PathVariable("roleId") String roleId) {
-        try {
-            final Role role = roleService.findById(roleId);
-            final RoleDto dto = mapper.from(role).toInstanceOf(RoleDto.class);
-            final Resource<RoleDto> resource = new Resource<>(dto);
+        final Role role = roleService.findById(roleId);
+        final RoleDto dto = mapper.from(role).toInstanceOf(RoleDto.class);
+        final Resource<RoleDto> resource = new Resource<>(dto);
 
-            resource.add(linkTo(methodOn(getClass()).findById(roleId)).withSelfRel());
-            return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
-        }
+        resource.add(linkTo(methodOn(getClass()).findById(roleId)).withSelfRel());
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> add(@RequestBody RoleDto dto) {
-        try {
-            roleService.save(mapper.from(dto).toInstanceOf(Role.class));
-            return ResponseEntity.noContent().build();
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        roleService.save(mapper.from(dto).toInstanceOf(Role.class));
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = {"/{roleId}"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> updateById(@PathVariable("roleId") String roleId, @RequestBody RoleDto dto) {
-        try {
-            final Role role = roleService.findById(roleId);
+        final Role role = roleService.findById(roleId);
 
-            mapper.from(dto).ignore("uid").to(role);
-            roleService.save(role);
-            return ResponseEntity.noContent().build();
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        mapper.from(dto).ignore("uid").to(role);
+        roleService.save(role);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{roleId}")
     public ResponseEntity<?> deleteById(@PathVariable("roleId") String roleId) {
-        try {
-            final Role role = roleService.findById(roleId);
+        final Role role = roleService.findById(roleId);
 
-            roleService.delete(role);
-            return ResponseEntity.noContent().build();
-        } catch (EntityConstraintViolationException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        roleService.delete(role);
+        return ResponseEntity.noContent().build();
     }
 }
