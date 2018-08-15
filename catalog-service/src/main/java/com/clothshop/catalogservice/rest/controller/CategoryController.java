@@ -1,8 +1,6 @@
 package com.clothshop.catalogservice.rest.controller;
 
 import com.clothshop.catalogservice.data.entity.Category;
-import com.clothshop.catalogservice.domain.Message;
-import com.clothshop.catalogservice.exception.EntityException;
 import com.clothshop.catalogservice.rest.dto.CategoryDto;
 import com.clothshop.catalogservice.service.CategoryService;
 import com.clothshop.catalogservice.util.SearchingAndPagingUtil;
@@ -75,16 +73,12 @@ public class CategoryController {
 
     @GetMapping(value = "{categoryId}", produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findById(@PathVariable("categoryId") String categoryId) {
-        try {
-            final Category category = categoryService.findById(categoryId);
-            final CategoryDto dto = mapper.from(category).toInstanceOf(CategoryDto.class);
-            final Resource<CategoryDto> resource = new Resource<>(dto);
+        final Category category = categoryService.findById(categoryId);
+        final CategoryDto dto = mapper.from(category).toInstanceOf(CategoryDto.class);
+        final Resource<CategoryDto> resource = new Resource<>(dto);
 
-            resource.add(linkTo(methodOn(getClass()).findById(categoryId)).withSelfRel());
-            return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityException e) {
-            return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
-        }
+        resource.add(linkTo(methodOn(getClass()).findById(categoryId)).withSelfRel());
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @GetMapping(value = "/search/findByParentIsNull", produces = {"application/json", "application/hal+json"})
@@ -178,36 +172,24 @@ public class CategoryController {
 
     @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> add(@RequestBody CategoryDto dto) {
-        try {
-            categoryService.save(mapper.from(dto).toInstanceOf(Category.class));
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        categoryService.save(mapper.from(dto).toInstanceOf(Category.class));
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = {"/{categoryId}"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> updateById(@PathVariable("categoryId") String categoryId, @RequestBody CategoryDto dto) {
-        try {
-            final Category category = categoryService.findById(categoryId);
+        final Category category = categoryService.findById(categoryId);
 
-            mapper.from(dto).ignore("uid").to(category);
-            categoryService.save(category);
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        mapper.from(dto).ignore("uid").to(category);
+        categoryService.save(category);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<?> deleteById(@PathVariable("categoryId") String categoryId) {
-        try {
-            final Category category = categoryService.findById(categoryId);
+        final Category category = categoryService.findById(categoryId);
 
-            categoryService.delete(category);
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        categoryService.delete(category);
+        return ResponseEntity.noContent().build();
     }
 }

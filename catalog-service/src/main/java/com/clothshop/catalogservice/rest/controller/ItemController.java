@@ -2,8 +2,6 @@ package com.clothshop.catalogservice.rest.controller;
 
 import com.clothshop.catalogservice.data.entity.Category;
 import com.clothshop.catalogservice.data.entity.Item;
-import com.clothshop.catalogservice.domain.Message;
-import com.clothshop.catalogservice.exception.EntityException;
 import com.clothshop.catalogservice.rest.dto.CategoryDto;
 import com.clothshop.catalogservice.rest.dto.ItemDto;
 import com.clothshop.catalogservice.service.ItemService;
@@ -76,18 +74,14 @@ public class ItemController {
 
     @GetMapping(value = {"/{itemId}"}, produces = {"application/json", "application/hal+json"})
     public ResponseEntity<?> findById(@PathVariable("itemId") String itemId) {
-        try {
-            final Item item = itemService.findById(itemId);
-            final ItemDto dto = mapper.from(item).toInstanceOf(ItemDto.class);
-            final Resource<ItemDto> resource = new Resource<>(dto);
+        final Item item = itemService.findById(itemId);
+        final ItemDto dto = mapper.from(item).toInstanceOf(ItemDto.class);
+        final Resource<ItemDto> resource = new Resource<>(dto);
 
-            resource.add(linkTo(methodOn(getClass()).findById(itemId)).withSelfRel());
-            resource.add(linkTo(methodOn(getClass()).findCategoriesById(dto.getUid(), null, null, null))
-                    .withRel("categories"));
-            return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityException e) {
-            return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
-        }
+        resource.add(linkTo(methodOn(getClass()).findById(itemId)).withSelfRel());
+        resource.add(linkTo(methodOn(getClass()).findCategoriesById(dto.getUid(), null, null, null))
+                .withRel("categories"));
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @GetMapping(value = {"/search/findByCategoryId"}, produces = {"application/json", "application/hal+json"})
@@ -166,36 +160,24 @@ public class ItemController {
 
     @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> add(@RequestBody ItemDto dto) {
-        try {
-            itemService.save(mapper.from(dto).toInstanceOf(Item.class));
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        itemService.save(mapper.from(dto).toInstanceOf(Item.class));
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = {"/{itemId}"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> updateById(@PathVariable("itemId") String itemId, @RequestBody ItemDto dto) {
-        try {
-            final Item item = itemService.findById(itemId);
+        final Item item = itemService.findById(itemId);
 
-            mapper.from(dto).ignore("uid").to(item);
-            itemService.save(item);
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        mapper.from(dto).ignore("uid").to(item);
+        itemService.save(item);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{itemId}")
     public ResponseEntity<?> deleteById(@PathVariable("itemId") String itemId) {
-        try {
-            final Item item = itemService.findById(itemId);
+        final Item item = itemService.findById(itemId);
 
-            itemService.delete(item);
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        itemService.delete(item);
+        return ResponseEntity.noContent().build();
     }
 }
