@@ -2,7 +2,7 @@ package com.clothshop.accountservice.rest.controller;
 
 import com.clothshop.accountservice.data.entity.Role;
 import com.clothshop.accountservice.domain.Message;
-import com.clothshop.accountservice.exception.EntityException;
+import com.clothshop.accountservice.exception.EntityConstraintViolationException;
 import com.clothshop.accountservice.rest.dto.RoleDto;
 import com.clothshop.accountservice.service.RoleService;
 import com.clothshop.accountservice.util.SearchingAndPagingUtil;
@@ -80,7 +80,7 @@ public class RoleController {
 
             resource.add(linkTo(methodOn(getClass()).findById(roleId)).withSelfRel());
             return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
         }
     }
@@ -90,7 +90,7 @@ public class RoleController {
         try {
             roleService.save(mapper.from(dto).toInstanceOf(Role.class));
             return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
         }
     }
@@ -103,7 +103,7 @@ public class RoleController {
             mapper.from(dto).ignore("uid").to(role);
             roleService.save(role);
             return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
         }
     }
@@ -115,7 +115,7 @@ public class RoleController {
 
             roleService.delete(role);
             return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
         }
     }

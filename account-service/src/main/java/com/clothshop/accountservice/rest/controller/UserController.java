@@ -2,7 +2,7 @@ package com.clothshop.accountservice.rest.controller;
 
 import com.clothshop.accountservice.data.entity.User;
 import com.clothshop.accountservice.domain.Message;
-import com.clothshop.accountservice.exception.EntityException;
+import com.clothshop.accountservice.exception.EntityConstraintViolationException;
 import com.clothshop.accountservice.rest.dto.UserDto;
 import com.clothshop.accountservice.service.UserService;
 import com.clothshop.accountservice.util.SearchingAndPagingUtil;
@@ -13,8 +13,10 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +82,7 @@ public class UserController {
 
             resource.add(linkTo(methodOn(getClass()).findById(userId)).withSelfRel());
             return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
         }
     }
@@ -94,19 +96,15 @@ public class UserController {
 
             resource.add(linkTo(methodOn(getClass()).findById(dto.getUid())).withSelfRel());
             return new ResponseEntity<>(resource, HttpStatus.OK);
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.status(404).body(new Message(404, e.getMessage()));
         }
     }
 
     @PostMapping(value = {"/add"}, consumes = {"application/json", "application/hal+json"})
     public ResponseEntity<?> add(@RequestBody UserDto dto) {
-        try {
-            userService.save(mapper.from(dto).toInstanceOf(User.class));
-            return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
-            return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
-        }
+        userService.save(mapper.from(dto).toInstanceOf(User.class));
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = {"/{userId}"}, consumes = {"application/json", "application/hal+json"})
@@ -117,7 +115,7 @@ public class UserController {
             mapper.from(dto).ignore("uid").to(user);
             userService.save(user);
             return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
         }
     }
@@ -129,7 +127,7 @@ public class UserController {
 
             userService.delete(user);
             return ResponseEntity.noContent().build();
-        } catch (EntityException e) {
+        } catch (EntityConstraintViolationException e) {
             return ResponseEntity.badRequest().body(new Message(400, e.getMessage()));
         }
     }

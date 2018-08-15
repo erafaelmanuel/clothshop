@@ -2,7 +2,7 @@ package com.clothshop.accountservice.service;
 
 import com.clothshop.accountservice.data.entity.Role;
 import com.clothshop.accountservice.data.repository.RoleRepository;
-import com.clothshop.accountservice.exception.EntityException;
+import com.clothshop.accountservice.exception.EntityConstraintViolationException;
 import com.clothshop.accountservice.util.UUIDGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,16 +24,16 @@ public class RoleService {
     }
 
     public Role findById(String roleId) {
-        return roleRepo.findById(roleId).orElseThrow(() -> new EntityException("No role found"));
+        return roleRepo.findById(roleId).orElseThrow(() -> new EntityConstraintViolationException("No role found"));
     }
 
     public Role findByName(String name) {
-        return roleRepo.findByName(name).orElseThrow(() -> new EntityException("No role found"));
+        return roleRepo.findByName(name).orElseThrow(() -> new EntityConstraintViolationException("No role found"));
     }
 
     public void save(Role role) {
         if (StringUtils.isEmpty(role.getName())) {
-            throw new EntityException("Property name is required!");
+            throw new EntityConstraintViolationException("Property name is required!");
         }
         if (StringUtils.isEmpty(role.getId())) {
             role.setId(UUIDGenerator.randomUUID());
