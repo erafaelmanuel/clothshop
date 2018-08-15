@@ -3,8 +3,12 @@ package com.clothshop.catalogservice.service;
 import com.clothshop.catalogservice.data.entity.Category;
 import com.clothshop.catalogservice.data.entity.Item;
 import com.clothshop.catalogservice.data.repository.ItemRepository;
-import com.clothshop.catalogservice.exception.EntityException;
+import com.clothshop.catalogservice.exception.EntityConstraintViolationException;
+import com.clothshop.catalogservice.exception.ItemNotFoundException;
 import com.clothshop.catalogservice.util.UUIDGenerator;
+import io.micrometer.core.lang.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,9 +23,12 @@ import java.util.List;
 public class ItemService {
 
     private ItemRepository itemRepo;
+    private MessageSource messageSource;
 
-    public ItemService(ItemRepository itemRepo) {
+    @Autowired
+    public ItemService(ItemRepository itemRepo, MessageSource messageSource) {
         this.itemRepo = itemRepo;
+        this.messageSource = messageSource;
     }
 
     public List<Item> findAll() {
@@ -33,28 +40,30 @@ public class ItemService {
         return items;
     }
 
-    public Page<Item> findAll(Specification<Item> specification, Pageable pageable) {
+    public Page<Item> findAll(@Nullable Specification<Item> specification, @Nullable Pageable pageable) {
         return itemRepo.findAll(specification, pageable);
     }
 
     public Item findById(@NotNull String id) {
-        return itemRepo.findById(id).orElseThrow(() -> new EntityException("No item found"));
+        return itemRepo.findById(id).orElseThrow(ItemNotFoundException::new);
     }
 
-    public Page<Item> findByCategoryId(@NotNull List<String> categoryId, Pageable pageable) {
+    public Page<Item> findByCategoryId(@NotNull List<String> categoryId, @Nullable Pageable pageable) {
         return itemRepo.findByCategoryId(categoryId, pageable);
     }
 
-    public Page<Category> findCategoriesById(String itemId, Pageable pageable) {
+    public Page<Category> findCategoriesById(String itemId, @Nullable Pageable pageable) {
         return itemRepo.findCategoriesById(itemId, pageable);
     }
 
     public void save(@NotNull Item item) {
         if (StringUtils.isEmpty(item.getName())) {
-            throw new EntityException("Property name is required!");
+            throw new EntityConstraintViolationException(
+                    messageSource.getMessage("error_message.name.required", null, null));
         }
         if (item.getPrice() < 0) {
-            throw new EntityException("Property price only accepts non-negative numbers");
+            throw new EntityConstraintViolationException(
+                    messageSource.getMessage("error_message.price.non-negative", null, null));
         }
         if (StringUtils.isEmpty(item.getId())) {
             item.setId(UUIDGenerator.randomUUID());
@@ -62,7 +71,7 @@ public class ItemService {
         itemRepo.save(item);
     }
 
-    public void delete(Item item) {
+    public void delete(@NotNull Item item) {
         itemRepo.delete(item);
     }
 }

@@ -2,8 +2,12 @@ package com.clothshop.catalogservice.service;
 
 import com.clothshop.catalogservice.data.entity.Category;
 import com.clothshop.catalogservice.data.repository.CategoryRepository;
-import com.clothshop.catalogservice.exception.EntityException;
+import com.clothshop.catalogservice.exception.CategoryNotFoundException;
+import com.clothshop.catalogservice.exception.EntityConstraintViolationException;
 import com.clothshop.catalogservice.util.UUIDGenerator;
+import io.micrometer.core.lang.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,24 +22,27 @@ import java.util.List;
 public class CategoryService {
 
     private CategoryRepository categoryRepo;
+    private MessageSource messageSource;
 
-    public CategoryService(CategoryRepository categoryRepo) {
+    @Autowired
+    public CategoryService(CategoryRepository categoryRepo, MessageSource messageSource) {
         this.categoryRepo = categoryRepo;
+        this.messageSource = messageSource;
     }
 
-    public Page<Category> findAll(Specification<Category> specification, Pageable pageable) {
+    public Page<Category> findAll(@Nullable Specification<Category> specification, @Nullable Pageable pageable) {
         return categoryRepo.findAll(specification, pageable);
     }
 
     public Category findById(@NotNull String categoryId) {
-        return categoryRepo.findById(categoryId).orElseThrow(() -> new EntityException("No category found"));
+        return categoryRepo.findById(categoryId).orElseThrow(CategoryNotFoundException::new);
     }
 
-    public Page<Category> findByParentIsNull(Pageable pageable) {
+    public Page<Category> findByParentIsNull(@Nullable Pageable pageable) {
         return categoryRepo.findByParentIsNull(pageable);
     }
 
-    public Page<Category> findByParentId(@NotNull String categoryId, Pageable pageable) {
+    public Page<Category> findByParentId(@NotNull String categoryId, @Nullable Pageable pageable) {
         return categoryRepo.findByParentId(categoryId, pageable);
     }
 
@@ -50,7 +57,8 @@ public class CategoryService {
 
     public void save(@NotNull Category category) {
         if (StringUtils.isEmpty(category.getName())) {
-            throw new EntityException("Property name is required!");
+            throw new EntityConstraintViolationException(
+                    messageSource.getMessage("error_message.name.required", null, null));
         }
         if (StringUtils.isEmpty(category.getId())) {
             category.setId(UUIDGenerator.randomUUID());
@@ -58,7 +66,7 @@ public class CategoryService {
         categoryRepo.save(category);
     }
 
-    public void delete(Category category) {
+    public void delete(@NotNull Category category) {
         categoryRepo.delete(category);
     }
 }
