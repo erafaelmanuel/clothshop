@@ -22,7 +22,7 @@ public class WebClientApplication {
 
     @GetMapping("/")
     public String test() {
-        System.out.println(userService.findAll());
+        System.out.println(userService.findAll().getContent());
         return "somthing";
     }
 }

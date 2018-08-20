@@ -8,8 +8,11 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public interface RestTemplateSupport {
 
@@ -25,5 +28,14 @@ public interface RestTemplateSupport {
         halConverter.setObjectMapper(objectMapper);
 
         return halConverter;
+    }
+
+    default RestTemplate getRestTemplate() {
+        final List<HttpMessageConverter<?>> newConverters = new ArrayList<>();
+        final RestTemplate restTemplate = new RestTemplate();
+        newConverters.add(getHalConverter());
+        newConverters.addAll(restTemplate.getMessageConverters());
+        restTemplate.setMessageConverters(newConverters);
+        return restTemplate;
     }
 }
